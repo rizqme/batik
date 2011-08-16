@@ -1,10 +1,17 @@
+# (c) Ahmad Rizqi Meydiarso <rizqi@namaku.de> MIT Licensed
 
 batik = (fn) ->
-	return (data) ->
-		batik.render fn, data
-		
+	render = (name, args...) ->
+		renderer = batik.getRenderer(@self, name)
+		if renderer
+			@que.push renderer.apply @self, args
+	
+	return (args...) ->
+		batik.render.apply {self:this, render:render}, [fn].concat(args)
 
-batik.version = '0.1'
+batik.version = '0.1.2alpha'
+
+# Taken from CoffeeKup (c) <maurice@bitbending.com>
 batik.tags = 'a|abbr|acronym|address|applet|area|article|aside|audio|b|base|basefont
 |bdo|big|blockquote|body|br|button|canvas|caption|center|cite|code|col|colgroup
 |command|datalist|dd|del|details|dfn|dir|div|dl|dt|em|embed|fieldset|figcaption
@@ -15,6 +22,7 @@ batik.tags = 'a|abbr|acronym|address|applet|area|article|aside|audio|b|base|base
 |strong|style|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|title
 |tr|tt|u|ul|video|xmp'.replace(/\n/g, '').split '|'
 
+# Taken from CoffeeKup
 cshelpers = """
   var __slice = Array.prototype.slice;
   var __hasProp = Object.prototype.hasOwnProperty;
@@ -30,11 +38,13 @@ cshelpers = """
     } return -1; };
 """.replace /\n/g, ''
 
+# Taken from CoffeeKup
 batik.self_closing = ['area', 'base', 'basefont', 'br', 'col', 'frame', 'hr',
   'img', 'input', 'link', 'meta', 'param']
 
 batik.nodes = {}
 
+# Inspired by CoffeeKup
 batik.resolveArgs = (args...) ->
 	for a in args
       switch typeof a
@@ -105,9 +115,17 @@ class batik.Scope
 
 batik.Scope.prototype = batik.nodes
 
-batik.render = (fn, data) ->
+batik.render = (fn, args...) ->
 	scope = new batik.Scope
-	fn.call scope, data
+	for key of this
+		scope[key] = this[key]
+	fn.apply scope, args
 	return scope.que.join('')
 
+batik.getRenderer = (scope, name) ->
+	name = name.charAt(0).toUpperCase() + name.slice(1)
+	if typeof scope["render#{name}"] is 'function'
+		return scope["render#{name}"]
+
+@batik = batik
 module.exports = batik
