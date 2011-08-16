@@ -1,0 +1,10 @@
+{
+  "name": "batik",
+  "description": "Super Simple CoffeeScript Templating",
+  "version": "0.1.0alpha",
+  "author": "Ahmad Rizqi Meydiarso <rizqi@namaku.de>",
+  "repository": {"type": "git", "url": "git://github.com/rizqme/batik.git"},
+  "keywords": ["template", "view", "coffeescript"],
+  "main": "./lib/batik",
+  "engines": {"node": ">= 0.4.1"}
+}
